@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bhumi Vikas Sahayak · भूमि विकास सहायक</title>
+<style>
+:root{
+  --bg:#eef2f7; --card:#fff; --ink:#18222f; --muted:#556376; --line:#cdd6e2;
+  --accent:#12315c; --accent-ink:#fff; --accent-soft:#e6edf7;
+  --saf:#b85f00; --saf-soft:#fff1de;
+  --ok:#1b7a3d; --ok-soft:#e4f4ea; --warn:#8a5300; --warn-soft:#fff4dc;
+  --bad:#b3261e; --bad-soft:#fdeceb; --quote:#f7f9fc;
+  --shadow:0 1px 2px rgba(15,35,70,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0a1320; --card:#111e30; --ink:#e5ecf5; --muted:#91a3b9; --line:#243750;
+    --accent:#8db8ff; --accent-ink:#071a33; --accent-soft:#172b46;
+    --saf:#ffb25e; --saf-soft:#3a2810;
+    --ok:#5fd18e; --ok-soft:#10301f; --warn:#f0b655; --warn-soft:#33270e;
+    --bad:#ff938a; --bad-soft:#3a1816; --quote:#0e1a2a; --shadow:none;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "Noto Sans","Segoe UI","Nirmala UI","Noto Sans Devanagari",system-ui,-apple-system,Roboto,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px;width:100%}
+.page{flex:1 0 auto}  /* main content grows so the footer sits at the bottom of short pages */
+
+/* government header */
+.tri{height:6px;background:linear-gradient(90deg,#ff9933 0 33.34%,#fff 33.34% 66.67%,#138808 66.67%)}
+.gov{background:linear-gradient(180deg,#14386a,#0e2a52);color:#fff;padding-top:env(safe-area-inset-top)}
+.gov-in{display:flex;align-items:center;gap:14px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.logo{flex:none;width:46px;height:46px;border-radius:50%;background:#fff;display:grid;place-items:center}
+.gov-t{flex:1;min-width:200px}
+.gov h1{margin:0;font-size:1.4rem;line-height:1.2;font-weight:700;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.gov h1 .en{font-size:1rem;font-weight:500;color:#c5d8f2}
+.gov .sub{font-size:.82rem;color:#b5c9e6;margin-top:2px}
+.lang{display:flex;border:1px solid rgba(255,255,255,.45);border-radius:6px;overflow:hidden}
+.lang button{border:0;background:none;color:#d3e2f7;padding:6px 13px;font:inherit;font-size:.85rem;cursor:pointer}
+.lang button[aria-pressed=true]{background:#fff;color:#0e2a52;font-weight:650}
+.ribbon{background:var(--accent-soft);border-bottom:1px solid var(--line)}
+
+.banner{background:var(--warn-soft);color:var(--warn);border:1px solid var(--line);border-left:4px solid var(--warn);
+  border-radius:4px;padding:9px 12px;font-size:.86rem;margin:18px 0 16px}
+.banner b{font-weight:700}
+.tabbar{display:flex;align-items:flex-end;gap:12px;border-bottom:2px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs{display:flex;flex-wrap:wrap;gap:2px;flex:1;min-width:0;overflow:visible}  /* wraps instead of scrolling */
+.btn.dl{margin:0 0 6px auto;padding:8px 14px;font-size:.88rem;background:var(--card);color:var(--accent);white-space:nowrap}
+.btn.dl:hover:not(:disabled){background:var(--accent);color:var(--accent-ink);filter:none}
+.dl-n{display:inline-block;min-width:1.4em;padding:0 6px;border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:.75rem}
+.dl-n:empty{display:none}
+#dl-msg:not(:empty){margin:-8px 0 14px;font-size:.85rem;color:var(--muted)}
+.tab{border:0;background:none;color:var(--muted);font:inherit;font-weight:600;padding:10px 16px;cursor:pointer;white-space:nowrap;
+  border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab:hover{color:var(--accent)}
+.tab[aria-selected=true]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.panel[hidden]{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:var(--shadow)}
+textarea,input{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);
+  border-radius:6px;padding:11px 12px;outline:none}
+textarea{min-height:92px;resize:vertical}
+textarea:focus,input:focus{border-color:var(--accent)}
+textarea:focus,input:focus,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 40%,transparent);outline-offset:1px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.btn{border:1.5px solid var(--accent);border-radius:6px;padding:10px 22px;font:inherit;font-weight:650;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink)}
+.btn:hover:not(:disabled){filter:brightness(1.1)}
+.btn:disabled{opacity:.6;cursor:progress}
+.btn.ghost{background:var(--card);color:var(--accent);padding:7px 14px;font-size:.88rem}
+.hint{color:var(--muted);font-size:.82rem}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 11px;
+  font:inherit;font-size:.84rem;cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+#result{margin-top:18px}
+.ans{border-left:4px solid var(--accent);animation:in .25s ease-out}
+.ans.ok{border-left-color:var(--ok)} .ans.nf{border-left-color:var(--warn)} .ans.bad{border-left-color:var(--bad)}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.badge{display:inline-flex;align-items:center;gap:6px;border-radius:4px;padding:3px 10px;font-size:.8rem;font-weight:700}
+.badge.ok{background:var(--ok-soft);color:var(--ok)} .badge.nf{background:var(--warn-soft);color:var(--warn)}
+.badge.bad{background:var(--bad-soft);color:var(--bad)}
+.answer{font-size:1.1rem;margin:12px 0 4px;overflow-wrap:anywhere}
+.answer p{margin:0 0 8px} .answer ul{margin:0 0 8px;padding-left:22px} .answer li{margin-bottom:6px}
+.ans.part{border-left-color:var(--warn)} .badge.part{background:var(--warn-soft);color:var(--warn)}
+.amend{background:var(--saf-soft);color:var(--ink);border-left:4px solid var(--saf);border-radius:4px;padding:9px 12px;margin:10px 0;font-size:.92rem}
+.amend small{display:block;color:var(--muted);margin-top:3px}
+.askc{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:4px;padding:9px 12px;margin:10px 0;font-size:.95rem}
+details.calc-d{margin-top:12px} details.calc-d summary,details.turn summary{cursor:pointer;color:var(--muted);font-size:.9rem}
+table.calc{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:8px}
+table.calc th{text-align:left;font-size:.78rem;color:var(--muted);font-weight:650;padding:6px 8px;border-bottom:2px solid var(--line)}
+table.calc td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.calc td.val{font-weight:700;font-size:1rem;overflow-wrap:anywhere}
+table.calc .note{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+table.calc .q{display:block;font:.8rem/1.45 Georgia,"Noto Serif",serif;color:var(--muted);margin-top:3px}
+table.calc a{color:var(--accent);font-weight:650;font-size:.82rem}
+.info{background:var(--accent-soft);border-radius:4px;padding:8px 12px;margin-top:10px;font-size:.85rem;color:var(--muted)}
+details.turn{margin-bottom:10px} details.turn>summary{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+details.turn>summary b{color:var(--ink)} details.turn[open]>summary{border-radius:8px 8px 0 0}
+details.turn .card{border-radius:0 0 8px 8px;border-top:0}
+.qline{font-weight:650;color:var(--accent);margin-bottom:6px;overflow-wrap:anywhere}
+.followup{margin-top:14px;border-left:4px solid var(--accent)}
+.followup textarea{min-height:64px}
+select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:10px 12px}
+.seg{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-bottom:12px}
+.seg .hint{margin-right:10px}
+.seg button{border:1.5px solid var(--accent);background:var(--card);color:var(--accent);font:inherit;font-weight:650;font-size:.9rem;padding:8px 16px;cursor:pointer}
+.seg button:first-of-type{border-radius:6px 0 0 6px} .seg button:last-of-type{border-radius:0 6px 6px 0;border-left:0}
+.seg button[aria-checked=true]{background:var(--accent);color:var(--accent-ink)}
+#fee-b[hidden],#fee-d[hidden]{display:none}
+
+/* Four answer states, each visually distinct (colour + icon + border style + explanation) */
+:root{--nf:#4a5568;--nf-soft:#eceff3}
+@media (prefers-color-scheme:dark){:root{--nf:#b7c2d0;--nf-soft:#1f2b3b}}
+.ans.nf{border-left:4px dashed var(--nf)!important;background:repeating-linear-gradient(135deg,var(--card) 0 14px,var(--nf-soft) 14px 15px)}
+.badge.nf{background:var(--nf-soft)!important;color:var(--nf)!important;border:1px dashed var(--nf)}
+.ans.bad{border-left-width:6px} .badge.bad{border:1px solid var(--bad)}
+.state-x{font-size:.85rem;margin:8px 0 0;padding:6px 10px;border-radius:4px}
+.state-x.ok{background:var(--ok-soft);color:var(--ok)} .state-x.part{background:var(--warn-soft);color:var(--warn)}
+.state-x.nf{background:var(--nf-soft);color:var(--nf)} .state-x.bad{background:var(--bad-soft);color:var(--bad)}
+
+.offline{background:var(--nf-soft);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--nf);border-radius:4px;padding:9px 12px;font-size:.88rem;margin:-6px 0 16px}
+.offline b{color:var(--nf)}
+
+/* Case summary + compare */
+.scen-wrap{display:grid;grid-template-columns:1fr;gap:12px}
+.scen{border:1px solid var(--line);border-radius:8px;padding:10px 12px 12px;margin:0;min-width:0}
+.scen legend{font-weight:700;color:var(--accent);padding:0 6px}
+.scen[hidden]{display:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:12px 0}
+.tile{background:var(--accent-soft);border-radius:6px;padding:10px 12px}
+.tile .k{font-size:.75rem;color:var(--muted);font-weight:650} .tile .v{font-size:1.15rem;font-weight:750;color:var(--accent);overflow-wrap:anywhere}
+.tile small{display:block;color:var(--muted);font-size:.72rem}
+table.cmp{width:100%;border-collapse:collapse;font-size:.92rem;margin-top:8px}
+table.cmp th{text-align:left;font-size:.78rem;color:var(--muted);padding:6px 8px;border-bottom:2px solid var(--line)}
+table.cmp td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+table.cmp tr.chg td{background:var(--saf-soft)} table.cmp tr.chg td:first-child{border-left:3px solid var(--saf)}
+table.cmp td.sec{font-weight:700;color:var(--accent);background:var(--accent-soft)}
+.chg-mark{color:var(--saf);font-weight:700;font-size:.78rem}
+ol.cites{padding-left:20px;margin:6px 0} ol.cites li{margin-bottom:8px} ol.cites .q{display:block;font:.85rem/1.5 Georgia,"Noto Serif",serif;color:var(--muted)}
+ol.cites a{color:var(--accent);font-weight:650;font-size:.82rem}
+
+/* Rules browser */
+.rule-list details{border-bottom:1px solid var(--line);padding:6px 0}
+.rule-list summary{cursor:pointer;font-weight:650;color:var(--accent)}
+.rule-list button{display:block;width:100%;text-align:left;border:0;background:none;font:inherit;font-size:.92rem;color:var(--ink);padding:5px 8px;cursor:pointer;border-radius:4px}
+.rule-list button:hover{background:var(--accent-soft)}
+.hit{padding:8px 0;border-bottom:1px solid var(--line)} .hit button{border:0;background:none;font:inherit;font-weight:700;color:var(--accent);cursor:pointer;padding:0;text-align:left}
+.hit .hint{display:block} mark{background:var(--saf-soft);color:inherit;padding:0 1px}
+h2{font-size:.92rem;margin:20px 0 8px;color:var(--accent);font-weight:700;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.cite{border:1px solid var(--line);border-radius:6px;margin-bottom:10px;overflow:hidden}
+.cite-h{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.cite-h b{color:var(--accent)}
+.cite blockquote{margin:0;padding:10px 14px;background:var(--quote);border-left:3px solid var(--accent);
+  font:.92rem/1.6 Georgia,"Noto Serif","Times New Roman",serif;white-space:pre-wrap;overflow-wrap:anywhere}  /* full quote, no inner scrollbar */
+.cite a{font-size:.85rem;color:var(--accent);font-weight:650}
+.v{font-size:.78rem;font-weight:700}.v.y{color:var(--ok)}.v.n{color:var(--bad)}
+.warn{background:var(--warn-soft);color:var(--warn);border-left:4px solid var(--warn);border-radius:4px;padding:8px 12px;margin:8px 0;font-size:.9rem}
+.meta{color:var(--muted);font-size:.8rem;margin-top:14px;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.skel{height:14px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--bg),var(--line));background-size:200% 100%;
+  animation:sh 1.2s linear infinite;margin:10px 0}
+@keyframes sh{to{background-position:-200% 0}}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{font-size:.85rem;font-weight:650;display:block;margin-bottom:4px}
+table.kv{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:8px}
+table.kv td{padding:8px 10px;border:1px solid var(--line);vertical-align:top}
+table.kv tr:nth-child(odd) td{background:var(--quote)}
+table.kv td:first-child{color:var(--muted);width:46%}
+table.kv td:last-child{font-weight:650;overflow-wrap:anywhere}
+.gov-foot{flex-shrink:0;margin-top:36px;background:#0e2a52;color:#b5c9e6;font-size:.8rem;line-height:1.6;text-align:center;padding:14px 0 calc(14px + env(safe-area-inset-bottom));border-top:6px solid #138808}
+.gov-foot p{margin:2px 0}
+.gov-foot b{color:#fff;font-weight:650}
+.gov-foot a{color:#dbe7f7;font-weight:600}
+.gov-foot a:hover{color:#fff}
+#slip{display:none}
+@media print{
+  body>*:not(#slip){display:none!important}
+  #slip{display:block;color:#000;background:#fff;font-size:12pt;padding:0}
+  #slip h1{font-size:16pt;border-bottom:3px double #000;padding-bottom:6px}
+  #slip blockquote{border-left:3px solid #000;margin:6px 0;padding:2px 10px;white-space:pre-wrap;font-family:Georgia,serif}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* Forms: every control the same height, labels on one line, room for an error under each field */
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px;align-items:start}
+@media (max-width:760px){.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.form-grid{grid-template-columns:1fr}}
+.form-grid[hidden]{display:none}
+.field{display:flex;flex-direction:column;min-width:0}
+.field>label,.field>.lbl{font-size:.85rem;font-weight:650;margin-bottom:5px;line-height:1.3;min-height:1.3em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field input[type=number],.field select,.check-box,.input-group{height:44px;box-sizing:border-box}
+.field input[type=number],.field select{width:100%;padding:0 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font:inherit}
+.input-group{display:flex}
+.input-group input{flex:1;min-width:0;border-radius:6px 0 0 6px!important;height:44px}
+.input-group select{width:auto!important;flex:none;max-width:45%;border-radius:0 6px 6px 0!important;border-left:0!important;background:var(--accent-soft)!important;height:44px}
+.check-box{display:flex;align-items:center;gap:10px;padding:0 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--card);font-size:.9rem;font-weight:500;cursor:pointer;margin:0;line-height:1.25}
+.check-box input{width:18px;height:18px;flex:none;margin:0}
+.check-box span{font-size:.84rem;line-height:1.2;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#fee-d.form-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr)}
+@media (max-width:760px){#fee-d.form-grid{grid-template-columns:1fr}}
+@media (max-width:640px){
+  .tabs{flex-basis:100%}
+  .btn.dl{margin:6px 0 8px;width:100%;justify-content:center}
+  .seg{gap:6px} .seg .hint{flex-basis:100%} .seg button{flex:1;border-radius:6px!important;border-left:1.5px solid var(--accent)!important}
+}
+.err{min-height:1.15em;font-size:.76rem;color:var(--bad);margin-top:3px;line-height:1.3}
+.field .invalid,.field .invalid:focus{border-color:var(--bad)!important;background:var(--bad-soft)!important}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Close button for anything that opens (details panels) */
+.close-d{display:block;margin:8px 0 2px auto;border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;padding:4px 12px;font:inherit;font-size:.8rem;cursor:pointer}
+.close-d:hover{color:var(--accent);border-color:var(--accent)}
+details>summary{list-style:none} details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:'▸ ';color:var(--muted)} details[open]>summary::before{content:'▾ '}
+</style>
+</head>
+<body>
+<div class="tri" aria-hidden="true"></div>
+<header class="gov">
+  <div class="wrap gov-in">
+    <div class="logo" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#12315c" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 13 14 5l10 8"/><path d="M7 12v11h14V12"/><path d="M12 23v-6h4v6"/></svg>
+    </div>
+    <div class="gov-t">
+      <h1 id="t-title"><span lang="hi">भूमि विकास सहायक</span><span class="en">Bhumi Vikas Sahayak</span></h1>
+      <div class="sub" id="t-sub"></div>
+    </div>
+    <div class="lang" role="group" aria-label="Interface language">
+      <button data-l="en" aria-pressed="true">English</button>
+      <button data-l="hi" aria-pressed="false">हिन्दी</button>
+    </div>
+  </div>
+</header>
+<div class="wrap page">
+
+  <div class="banner" id="banner" role="note"></div>
+  <div class="offline" id="offline" role="status" hidden></div>
+
+  <div class="tabbar">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="ask" aria-selected="true" id="tab-ask"></button>
+      <button class="tab" role="tab" data-tab="plot" aria-selected="false" id="tab-plot"></button>
+      <button class="tab" role="tab" data-tab="fee" aria-selected="false" id="tab-fee"></button>
+      <button class="tab" role="tab" data-tab="rules" aria-selected="false" id="tab-rules"></button>
+    </div>
+    <button class="btn dl" id="dl" type="button"><span aria-hidden="true">⬇</span> <span data-k="dl"></span> <span class="dl-n" id="dl-n"></span></button>
+  </div>
+  <div id="dl-msg" role="status"></div>
+
+  <!-- ASK -->
+  <section class="panel" id="p-ask">
+    <div class="card">
+      <label for="q" id="l-q"></label>
+      <textarea id="q" maxlength="1200"></textarea>
+      <div class="row">
+        <button class="btn" id="go"></button>
+        <span class="hint" id="h-keys"></span>
+        <span class="hint" id="timer" aria-live="polite"></span>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div id="result" aria-live="polite"></div>
+  </section>
+
+  <!-- SETBACK & FAR (+ compare two scenarios) -->
+  <section class="panel" id="p-plot" hidden>
+    <div class="card">
+      <p class="hint" id="h-plot" style="margin-top:0"></p>
+      <div class="scen-wrap">
+        <fieldset class="scen" id="sc-a"><legend data-k="scA"></legend>
+          <div class="form-grid">
+            <div class="field"><label for="pa" data-k="pa"></label><input id="pa" data-f="plot_area_sqm" type="number" min="0" step="any" inputmode="decimal" value="200"><div class="err" data-err="plot_area_sqm"></div></div>
+            <div class="field"><label for="rw" data-k="rw"></label><input id="rw" data-f="road_width_m" type="number" min="0" step="any" inputmode="decimal" value="9"><div class="err" data-err="road_width_m"></div></div>
+            <div class="field"><label for="pf" data-k="pf"></label><input id="pf" data-f="frontage_m" type="number" min="0" step="any" inputmode="decimal" data-ph="opt"><div class="err" data-err="frontage_m"></div></div>
+            <div class="field"><label for="pt" data-k="pt"></label><select id="pt" data-f="building_type"><option value="" data-k="oany"></option><option value="detached" data-k="odet"></option><option value="semi_detached" data-k="osemi"></option><option value="row" data-k="orow"></option></select><div class="err" data-err="building_type"></div></div>
+            <div class="field"><label for="ph" data-k="ph"></label><input id="ph" data-f="proposed_height_m" type="number" min="0" step="any" inputmode="decimal" data-ph="opt"><div class="err" data-err="proposed_height_m"></div></div>
+          </div>
+        </fieldset>
+        <fieldset class="scen" id="sc-b" hidden><legend data-k="scB"></legend>
+          <div class="form-grid">
+            <div class="field"><label for="cb-area" data-k="pa"></label><input id="cb-area" data-f="plot_area_sqm" type="number" min="0" step="any" inputmode="decimal"><div class="err" data-err="plot_area_sqm"></div></div>
+            <div class="field"><label for="cb-road" data-k="rw"></label><input id="cb-road" data-f="road_width_m" type="number" min="0" step="any" inputmode="decimal"><div class="err" data-err="road_width_m"></div></div>
+            <div class="field"><label for="cb-front" data-k="pf"></label><input id="cb-front" data-f="frontage_m" type="number" min="0" step="any" inputmode="decimal" data-ph="opt"><div class="err" data-err="frontage_m"></div></div>
+            <div class="field"><label for="cb-type" data-k="pt"></label><select id="cb-type" data-f="building_type"><option value="" data-k="oany"></option><option value="detached" data-k="odet"></option><option value="semi_detached" data-k="osemi"></option><option value="row" data-k="orow"></option></select><div class="err" data-err="building_type"></div></div>
+            <div class="field"><label for="cb-height" data-k="ph"></label><input id="cb-height" data-f="proposed_height_m" type="number" min="0" step="any" inputmode="decimal" data-ph="opt"><div class="err" data-err="proposed_height_m"></div></div>
+          </div>
+        </fieldset>
+      </div>
+      <div class="row">
+        <button class="btn" id="go-plot"></button>
+        <button class="btn ghost" id="go-compare" type="button" aria-expanded="false" aria-controls="sc-b" data-k="compare"></button>
+      </div>
+    </div>
+    <div id="res-plot"></div>
+  </section>
+
+  <!-- FEE -->
+  <section class="panel" id="p-fee" hidden>
+    <div class="card">
+      <div class="seg" role="radiogroup" id="fee-mode" aria-labelledby="l-fmode">
+        <span class="hint" id="l-fmode"></span>
+        <button type="button" role="radio" data-m="building" aria-checked="true" id="m-building"></button>
+        <button type="button" role="radio" data-m="development" aria-checked="false" id="m-development"></button>
+      </div>
+      <p class="hint" id="h-fee"></p>
+      <!-- Building permission fee: Rule 21(2)(ii) + 21(3)(b)/(c) -->
+      <div class="form-grid" id="fee-b">
+        <div class="field"><label for="ba" data-k="ba"></label><input id="ba" data-f="built_up_area_sqm" type="number" min="0" step="any" inputmode="decimal" value="150"><div class="err" data-err="built_up_area_sqm"></div></div>
+        <div class="field"><label for="fu" data-k="fu"></label><select id="fu" data-f="use"><option value="residential" data-k="ores"></option><option value="commercial" data-k="ocom"></option><option value="shop_cum_residence" data-k="oscr"></option><option value="social_educational" data-k="osoc"></option><option value="factory_admin_block" data-k="ofac"></option></select><div class="err" data-err="use"></div></div>
+        <div class="field"><span class="lbl" data-k="hrL"></span><label class="check-box" for="fh"><input id="fh" type="checkbox"> <span data-k="fh"></span></label><div class="err"></div></div>
+      </div>
+      <!-- Development permission fee: Rule 21(2)(i) + 21(3)(a) -->
+      <div class="form-grid" id="fee-d" hidden>
+        <div class="field"><label for="da" data-k="da"></label>
+          <div class="input-group"><input id="da" data-f="land_area_sqm" type="number" min="0" step="any" inputmode="decimal" value="1.2">
+            <select id="du" aria-label="unit"><option value="ha" data-k="oha"></option><option value="sqm" data-k="osqm"></option><option value="acre" data-k="oacre"></option></select></div>
+          <div class="err" data-err="land_area_sqm"></div></div>
+        <div class="field"><label for="dz" data-k="dz"></label><select id="dz"><option value="residential_psp_industrial_transport" data-k="ozres"></option><option value="commercial" data-k="ozcom"></option><option value="recreational_agriculture_other" data-k="ozrec"></option></select><div class="err"></div></div>
+        <div class="field"><label for="dp" data-k="dp"></label><select id="dp"><option value="above_10_lakh" data-k="op1"></option><option value="5_to_10_lakh" data-k="op2"></option><option value="below_5_lakh" data-k="op3"></option></select><div class="err"></div></div>
+      </div>
+      <div class="row"><button class="btn" id="go-fee"></button></div>
+    </div>
+    <div id="res-fee"></div>
+  </section>
+
+  <!-- RULES: offline browse + search -->
+  <section class="panel" id="p-rules" hidden>
+    <div class="card">
+      <p class="hint" style="margin-top:0" data-k="hrules"></p>
+      <div class="row" style="margin-top:0">
+        <input id="rs" autocomplete="off" style="flex:1;min-width:200px">
+        <button class="btn" id="go-search" data-k="search"></button>
+      </div>
+      <div id="res-search"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="row" style="margin-top:0;justify-content:space-between"><h2 style="margin:0;border:0" data-k="browse"></h2>
+        <button class="btn ghost" id="collapse-all" type="button" data-k="collapseAll"></button></div>
+      <div id="rule-list" class="rule-list"></div>
+    </div>
+    <div id="rule-view"></div>
+  </section>
+
+</div>
+
+<footer class="gov-foot"><div class="wrap" id="foot"></div></footer>
+
+<div id="slip" aria-hidden="true"></div>
+
+<script>
+/* ---------- Config ---------- */
+const CFG = {
+  ask:  '/api/ask',          // POST {question, history}
+  plot: '/api/calc/plot',    // POST plot inputs
+  fee:  '/api/calc/fee',     // POST built-up area, use, high-rise
+  devfee:'/api/calc/devfee', // POST land area, zone, population
+  validate: '/api/validate/',// + plot | fee | devfee
+  report: '/api/report',     // POST session -> PDF
+  pdf:  '/pdf/en',           // opened as /pdf/en#page=N
+  pdfHi:'/pdf/hi',
+  rule: '/api/rule/',
+  versionLabel: { en: 'Rules consolidated up to 6 March 2025', hi: 'नियम 6 मार्च 2025 तक समेकित' }
+};
+
+/* ---------- Strings ---------- */
+const T = {
+ en:{sub:'Building Permission Counter · MP Bhumi Vikas Rules, 2012',
+  banner:'<b>Version:</b> rules consolidated up to 6 March 2025. A later amendment (28 Aug 2026, Rule 2(5)(c), plots up to 500 sq m) may apply; check the official gazette.',
+  ask:'Ask a question',plot:'Setback & FAR',fee:'Fee',rules:'Rules (offline)',
+  lq:'Citizen\'s question (English or हिन्दी)',ph:'e.g. My plot is 200 sq m on a 9 m road. Front gap, floors, fee?',
+  go:'Get answer',keys:'Ctrl + Enter to send',working:'Reading the rules…',
+  verified:'Verified quote',unverified:'Not verified',
+  ok:'Answer from the rules',part:'Partly covered by the rules',nf:'Not found in the rules',bad:'Could not verify',
+  xok:'Every statement is backed by rule text verified against the official PDF.',
+  xpart:'The rules cover only part of this question. The uncovered part is deliberately left unanswered.',
+  xnf:'The available rules do not support a reliable answer. Nothing has been filled in from general knowledge, so this is not a statement of municipal law.',
+  xbad:'The quoted text could not be found in the official rules. Do not rely on this answer. Check the PDF.',
+  cites:'Rule text this answer is based on',open:'Open PDF page',page:'PDF page',
+  copy:'Copy',copied:'Copied',print:'Print for citizen',
+  err:'Could not reach the server. Check that it is running and try again.',
+  hplot:'Residential plot: setbacks, permitted building type, FAR and height from the rule tables. Compare two scenarios to see what changes.',
+  pa:'Plot area (sq m)',rw:'Road width (m)',pf:'Frontage (m)',pt:'Building type',ph:'Height (m)',opt:'optional',calc:'Calculate',
+  oany:'Not sure / any',odet:'Detached',osemi:'Semi-detached',orow:'Row-type',
+  scA:'Scenario A',scB:'Scenario B',compare:'Compare with another scenario',compareOff:'Hide comparison',
+  cmpTitle:'Scenario comparison',inputs:'Inputs',nChanged:' items differ between the scenarios',sameAll:'No difference between the scenarios.',changed:'changed',
+  fmode:'Fee type:',mB:'Building permission fee',mD:'Development permission fee',
+  hfee:'Building permission fee under Rule 21: application fee 21(2)(ii) + permission fee 21(3)(b)/(c).',
+  hfeeD:'Development permission fee for land under Rule 21: application fee 21(2)(i) + permission fee 21(3)(a).',
+  ba:'Built-up area (sq m)',fu:'Use',ores:'Residence only',ocom:'Shop / commercial / industrial (+50%)',
+  oscr:'Shop-cum-residence (+50%)',osoc:'Social / charitable / educational',ofac:'Admin block in a factory',
+  hrL:'High-rise',fh:'More than 10 storeys or above 30 m',
+  da:'Land area',oha:'hectare',osqm:'sq m',oacre:'acre',dz:'Land use zone',
+  ozres:'Residential / Public & semi-public / Industrial / Transport',ozcom:'Commercial',ozrec:'Recreational / Agriculture / Other',
+  dp:'Planning area population',op1:'More than 10 lakh (Bhopal)',op2:'5 to 10 lakh',op3:'Less than 5 lakh',
+  item:'Item',value:'Value',source:'Source',rule:'Rule',floorsA:'Floor estimate assumptions',calcD:'Calculation details',
+  amend:'Later amendment (after 6 March 2025)',amendSrc:'Source',gazette:'Check against the official gazette.',askc:'Ask the citizen',
+  follow:'Follow-up question about the same case',followPh:'e.g. And if the road were 12 m wide? / What if it is a row house?',
+  followGo:'Ask follow-up',newQ:'New question',
+  rejQ:'quote(s) rejected: not found in the official text, not used as support',
+  req1:'AI request',reqN:'AI requests',cached:'saved answer (asked before)',
+  hrules:'Browse and search all 106 rules. Works offline, with no AI involved.',search:'Search',rsph:'Search words, e.g. balcony, lift, parking, fee',
+  browse:'All rules by part',collapseAll:'Close all',noHits:'No rule contains all these words.',hits:' rules match',rnf:'Rule not found.',
+  offT:'Offline reference mode',offD:'AI answers are not available right now. Rule browsing and the Setback & FAR and Fee tabs work fully offline.',
+  offAsk:'AI answers are unavailable (offline reference mode). The Setback & FAR, Fee and Rules tabs work without the AI.',
+  goRulesT:'Open Rules',goPlotT:'Open Setback & FAR',
+  dl:'Download report (PDF)',dlBusy:'Preparing the PDF…',dlNone:'Nothing to download yet. Ask a question or calculate first.',
+  dlDone:'Report downloaded: ',close:'Close',fixErr:'Fix the highlighted fields first.',num:'Enter a number.',
+  disc:'Not legal advice. The tool points to the rule; the clerk decides.',
+  footB:'This tool points to the rule. The clerk decides.',
+  footR:'It is not legal advice. The town\'s Development Plan may set different norms (Rule 103).',
+  src:'Source',pdfEn:'Official English PDF',pdfHi:'Hindi PDF',
+  slipT:'Building Permission Query · Bhopal Municipal Corporation',q:'Question',a:'Answer',ver:'Rules version',empty:'Type a question first.'},
+ hi:{sub:'भवन अनुज्ञा काउंटर · एमपी भूमि विकास नियम, 2012',
+  banner:'<b>संस्करण:</b> नियम 6 मार्च 2025 तक समेकित। बाद का संशोधन (28 अगस्त 2026, नियम 2(5)(c), 500 वर्ग मी तक के प्लॉट) लागू हो सकता है; राजपत्र से जाँचें।',
+  ask:'प्रश्न पूछें',plot:'सेटबैक व FAR',fee:'शुल्क',rules:'नियम (ऑफ़लाइन)',
+  lq:'नागरिक का प्रश्न (हिन्दी या English)',ph:'जैसे: मेरा प्लॉट 200 वर्ग मी है, सड़क 9 मी चौड़ी। सामने कितनी जगह छोड़ें, कितनी मंज़िल, शुल्क?',
+  go:'उत्तर पाएँ',keys:'भेजने के लिए Ctrl + Enter',working:'नियम पढ़े जा रहे हैं…',
+  verified:'सत्यापित उद्धरण',unverified:'सत्यापित नहीं',
+  ok:'नियमों से उत्तर',part:'नियमों में आंशिक उत्तर',nf:'नियमों में नहीं मिला',bad:'सत्यापित नहीं हो सका',
+  xok:'हर बात आधिकारिक PDF से सत्यापित नियम-पाठ पर आधारित है।',
+  xpart:'नियम इस प्रश्न का केवल एक हिस्सा बताते हैं। बाकी हिस्सा जानबूझकर बिना उत्तर के छोड़ा गया है।',
+  xnf:'उपलब्ध नियमों से इसका विश्वसनीय उत्तर नहीं मिलता। सामान्य जानकारी से कुछ नहीं भरा गया है, इसलिए यह नगर पालिक कानून का कथन नहीं है।',
+  xbad:'उद्धृत पाठ आधिकारिक नियमों में नहीं मिला। इस उत्तर पर भरोसा न करें। PDF देखें।',
+  cites:'जिस नियम-पाठ पर उत्तर आधारित है',open:'PDF पृष्ठ खोलें',page:'PDF पृष्ठ',
+  copy:'कॉपी',copied:'कॉपी हो गया',print:'नागरिक के लिए प्रिंट',
+  err:'सर्वर से संपर्क नहीं हो सका। जाँचें कि सर्वर चालू है और फिर प्रयास करें।',
+  hplot:'आवासीय प्लॉट: नियम तालिकाओं से सेटबैक, अनुमत भवन प्रकार, FAR और ऊँचाई। दो स्थितियों की तुलना करके देखें कि क्या बदलता है।',
+  pa:'प्लॉट क्षेत्रफल (वर्ग मी)',rw:'सड़क की चौड़ाई (मी)',pf:'फ्रंटेज (मी)',pt:'भवन का प्रकार',ph:'ऊँचाई (मी)',opt:'वैकल्पिक',calc:'गणना करें',
+  oany:'पता नहीं / कोई भी',odet:'डिटैच्ड',osemi:'सेमी-डिटैच्ड',orow:'रो-टाइप',
+  scA:'स्थिति A',scB:'स्थिति B',compare:'दूसरी स्थिति से तुलना करें',compareOff:'तुलना छिपाएँ',
+  cmpTitle:'स्थितियों की तुलना',inputs:'इनपुट',nChanged:' मद दोनों स्थितियों में अलग हैं',sameAll:'दोनों स्थितियों में कोई अंतर नहीं।',changed:'बदला',
+  fmode:'शुल्क का प्रकार:',mB:'भवन अनुज्ञा शुल्क',mD:'विकास अनुज्ञा शुल्क',
+  hfee:'नियम 21 के अंतर्गत भवन अनुज्ञा शुल्क: आवेदन शुल्क 21(2)(ii) + अनुज्ञा शुल्क 21(3)(b)/(c)।',
+  hfeeD:'नियम 21 के अंतर्गत भूमि के विकास की अनुज्ञा का शुल्क: आवेदन शुल्क 21(2)(i) + अनुज्ञा शुल्क 21(3)(a)।',
+  ba:'निर्मित क्षेत्रफल (वर्ग मी)',fu:'उपयोग',ores:'केवल आवास',ocom:'दुकान / व्यावसायिक / औद्योगिक (+50%)',
+  oscr:'दुकान-सह-आवास (+50%)',osoc:'सामाजिक / धर्मार्थ / शैक्षणिक',ofac:'फैक्ट्री का प्रशासनिक ब्लॉक',
+  hrL:'हाई-राइज',fh:'10 से अधिक मंज़िल या 30 मी से ऊँचा',
+  da:'भूमि का क्षेत्रफल',oha:'हेक्टेयर',osqm:'वर्ग मी',oacre:'एकड़',dz:'भूमि उपयोग क्षेत्र (ज़ोन)',
+  ozres:'आवासीय / सार्वजनिक / औद्योगिक / परिवहन',ozcom:'व्यावसायिक',ozrec:'मनोरंजन / कृषि / अन्य',
+  dp:'योजना क्षेत्र की जनसंख्या',op1:'10 लाख से अधिक (भोपाल)',op2:'5 से 10 लाख',op3:'5 लाख से कम',
+  item:'मद',value:'मान',source:'स्रोत',rule:'नियम',floorsA:'मंज़िल अनुमान की मान्यताएँ',calcD:'गणना का विवरण',
+  amend:'बाद का संशोधन (6 मार्च 2025 के बाद)',amendSrc:'स्रोत',gazette:'आधिकारिक राजपत्र से जाँचें।',askc:'नागरिक से पूछें',
+  follow:'इसी मामले पर अगला प्रश्न',followPh:'जैसे: अगर सड़क 12 मीटर चौड़ी हो तो? / अगर रो-हाउस हो तो?',
+  followGo:'अगला प्रश्न पूछें',newQ:'नया प्रश्न',
+  rejQ:'उद्धरण अस्वीकृत: आधिकारिक पाठ में नहीं मिले, आधार के रूप में उपयोग नहीं',
+  req1:'AI अनुरोध',reqN:'AI अनुरोध',cached:'सहेजा गया उत्तर (पहले पूछा गया)',
+  hrules:'सभी 106 नियम देखें और खोजें। ऑफ़लाइन काम करता है, कोई AI नहीं।',search:'खोजें',rsph:'शब्द खोजें, जैसे balcony, lift, parking, fee',
+  browse:'भाग के अनुसार सभी नियम',collapseAll:'सब बंद करें',noHits:'किसी नियम में ये सभी शब्द नहीं हैं।',hits:' नियम मिले',rnf:'नियम नहीं मिला।',
+  offT:'ऑफ़लाइन संदर्भ मोड',offD:'अभी AI उत्तर उपलब्ध नहीं हैं। नियम देखना और सेटबैक व FAR तथा शुल्क टैब पूरी तरह ऑफ़लाइन काम करते हैं।',
+  offAsk:'AI उत्तर उपलब्ध नहीं हैं (ऑफ़लाइन संदर्भ मोड)। सेटबैक व FAR, शुल्क और नियम टैब AI के बिना काम करते हैं।',
+  goRulesT:'नियम खोलें',goPlotT:'सेटबैक व FAR खोलें',
+  dl:'रिपोर्ट डाउनलोड करें (PDF)',dlBusy:'PDF तैयार हो रही है…',dlNone:'अभी डाउनलोड के लिए कुछ नहीं है। पहले प्रश्न पूछें या गणना करें।',
+  dlDone:'रिपोर्ट डाउनलोड हुई: ',close:'बंद करें',fixErr:'पहले लाल चिह्नित खाने ठीक करें।',num:'संख्या लिखें।',
+  disc:'यह कानूनी सलाह नहीं है। टूल नियम बताता है; निर्णय लिपिक का है।',
+  footB:'यह टूल नियम बताता है। निर्णय लिपिक का है।',
+  footR:'यह कानूनी सलाह नहीं है। शहर की विकास योजना में अलग मानदंड हो सकते हैं (नियम 103)।',
+  src:'स्रोत',pdfEn:'आधिकारिक अंग्रेज़ी PDF',pdfHi:'हिन्दी PDF',
+  slipT:'भवन अनुज्ञा पूछताछ · भोपाल नगर पालिक निगम',q:'प्रश्न',a:'उत्तर',ver:'नियम संस्करण',empty:'पहले प्रश्न लिखें।'}
+};
+const EXAMPLES = [
+  'My plot is 200 sq m on a 9 m road. How much gap do I leave at the front, how many floors can I build, and what fee do I pay?',
+  'मेरा प्लॉट 200 वर्ग मीटर का है और सड़क 9 मीटर चौड़ी है। सामने कितनी जगह छोड़नी होगी?',
+  'What is the building permission fee for 150 sq m built-up area?',
+  'What is the property tax rate in Bhopal?'
+];
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+const BASE = location.protocol === 'file:' ? 'http://localhost:8000' : '';  // page opened from disk -> local server
+const setUrl = q => { try { history.replaceState(null,'',q); } catch(e){} };
+const t = k => T[L][k] || T.en[k] || k;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isHi = s => /[ऀ-ॿ]/.test(s || '');
+const pdfUrl = p => BASE + CFG.pdf + (p ? '#page=' + encodeURIComponent(String(p).split(/[-–,]/)[0].trim()) : '');
+const errMsg = async res => { try { const j = await res.json(); const d = j.detail ?? j.error ?? j.message; return d ? (typeof d==='string'?d:JSON.stringify(d)) : ''; } catch(e){ return ''; } };
+const failHtml = (m, extra) => '<div class="card ans bad" style="margin-top:14px"><span class="badge bad">'+esc(t('bad'))+'</span><p>'+esc(m)+'</p>'+(extra?'<p class="hint">'+esc(extra)+'</p>':'')+'</div>';
+const fail = (box, m, extra) => box.innerHTML = failHtml(m, extra);
+const plain = s => String(s || '').replace(/\*\*/g, '');
+const tidyQuote = s => String(s || '').replace(/\n[ \t]+/g, '\n');
+async function postJSON(url, body){
+  const res = await fetch(BASE + url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  if (!res.ok){ const d = await errMsg(res); throw new Error('HTTP '+res.status+(d?': '+d:'')); }
+  return res.json();
+}
+
+/* ---------- State ---------- */
+let L = 'en';
+let thread = [];            // current conversation: [{q, a (normalised), took}]
+const pastThreads = [];     // earlier conversations in this session (kept for the PDF report)
+const calcLast = {};        // last result per calculator: plot, compare, fee, devfee
+const calcInputs = {};      // inputs those results were computed from (sent to the PDF report)
+const STATE_ICON = {ok:'✓', part:'◐', nf:'∅', bad:'✗'};
+let aiOK = null, aiWhy = '';
+let feeMode = 'building';
+
+/* ---------- Language ---------- */
+function applyLang(l){
+  L = l; document.documentElement.lang = l;
+  document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === l));
+  $('t-sub').textContent = t('sub'); $('banner').innerHTML = t('banner');
+  ['ask','plot','fee','rules'].forEach(x => $('tab-'+x).textContent = t(x));
+  document.querySelectorAll('[data-k]').forEach(el => el.textContent = t(el.dataset.k));
+  document.querySelectorAll('[data-ph]').forEach(el => el.placeholder = t(el.dataset.ph));
+  document.querySelectorAll('.close-d').forEach(b => b.textContent = '▴ ' + t('close'));
+  $('l-q').textContent = t('lq'); $('q').placeholder = t('ph'); $('go').textContent = t('go'); $('h-keys').textContent = t('keys');
+  $('rs').placeholder = t('rsph');
+  $('h-plot').textContent = t('hplot'); $('go-plot').textContent = t('calc'); $('go-fee').textContent = t('calc');
+  $('go-compare').textContent = t($('sc-b').hidden ? 'compare' : 'compareOff');
+  $('l-fmode').textContent = t('fmode'); $('m-building').textContent = t('mB'); $('m-development').textContent = t('mD');
+  $('h-fee').textContent = t(feeMode === 'development' ? 'hfeeD' : 'hfee');
+  $('foot').innerHTML = '<p><b>'+esc(t('footB'))+'</b> '+esc(t('footR'))+'</p>'
+    + '<p>'+esc(t('src'))+': <a href="'+esc(BASE + CFG.pdf)+'" target="_blank" rel="noopener">'+esc(t('pdfEn'))+'</a> · '
+    + '<a href="'+esc(BASE + CFG.pdfHi)+'" target="_blank" rel="noopener">'+esc(t('pdfHi'))+'</a> · '+esc(CFG.versionLabel[l])+'</p>';
+  renderOffline();
+  Object.values(FORMS).forEach(f => f.last && showErrors(f, f.last));
+  renderPlotResult(); showFeeResult();
+  if (thread.length) renderThread();
+}
+function showTab(n){
+  if (n === 'rules') loadRuleList();
+  ['ask','plot','fee','rules'].forEach(x => {
+    $('p-'+x).hidden = x !== n;
+    $('tab-'+x).setAttribute('aria-selected', x === n);
+  });
+}
+
+/* ---------- Ask (new question) and follow-up ---------- */
+function normalize(r){
+  const raw = r || {};
+  const st = String(raw.status || '').toLowerCase();
+  const cites = (raw.citations || []).map(c => ({rule: c.rule ?? '', title: c.title || '', quote: c.quote || '',
+    supports: c.supports || '', verified: !!c.verified, page: c.page ?? ''}));
+  let status = 'ok';
+  if (st === 'not_found') status = 'nf';
+  else if (st === 'partial') status = 'part';
+  else if (st === 'unverified' || st === 'error') status = 'bad';
+  else if (cites.length && !cites.some(c => c.verified)) status = 'bad';
+  return {status, rawStatus: st, answer: raw.answer || '', cites, citedRules: raw.cited_rules || [],
+    warnings: (raw.warnings || []).filter(Boolean), needs: raw.ask_citizen || '', amendNote: raw.amendment_note || '',
+    amendments: raw.amendments || [], calcs: raw.calculations || [], version: raw.rules_version || '',
+    model: raw.meta?.model || '', rejected: raw.rejected_citations || [], calls: raw.meta?.api_calls || 0,
+    cached: !!raw.meta?.cached};
+}
+function fmt(s){   // escape first, then **bold** and "- " bullet lines
+  const lines = esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').split('\n');
+  let h = '', list = false;
+  for (const l of lines){
+    const m = l.match(/^\s*[-•*]\s+(.*)$/);
+    if (m){ if (!list){ h += '<ul>'; list = true; } h += '<li>'+m[1]+'</li>'; }
+    else { if (list){ h += '</ul>'; list = false; } if (l.trim()) h += '<p>'+l+'</p>'; }
+  }
+  return h + (list ? '</ul>' : '');
+}
+let timerId;
+function archiveThread(){ if (thread.length) pastThreads.push(thread); thread = []; }
+function ask(){
+  const q = $('q').value.trim();
+  if (!q){ $('result').innerHTML = '<div class="warn">'+esc(t('empty'))+'</div>'; return; }
+  archiveThread();                   // a new question starts a new conversation (old one kept for the report)
+  setUrl('?q='+encodeURIComponent(q));
+  send(q);
+}
+function askFollow(){
+  const box = $('fq'); if (!box) return;
+  const q = box.value.trim();
+  if (!q){ box.focus(); return; }
+  send(q);
+}
+function newQuestion(){
+  archiveThread(); $('result').innerHTML = ''; setUrl(location.pathname);
+  $('q').value = ''; $('q').focus(); updateDl();
+}
+async function send(q){
+  if (aiOK === false){ $('result').innerHTML = offlineCard(); return; }
+  const history = thread.map(x => ({question: x.q, answer: plain(x.a.answer), cited_rules: x.a.citedRules}));
+  setBusy(true);
+  const t0 = Date.now();
+  renderThread('<div class="card" style="margin-top:14px"><div class="qline">'+esc(q)+'</div><div class="hint">'+esc(t('working'))+'</div><div class="skel" style="width:90%"></div><div class="skel" style="width:75%"></div><div class="skel" style="width:60%"></div></div>');
+  timerId = setInterval(() => $('timer').textContent = ((Date.now()-t0)/1000).toFixed(0)+' s', 500);
+  try{
+    const r = await postJSON(CFG.ask, {question:q, history});
+    thread.push({q, a: normalize(r), took: ((Date.now()-t0)/1000).toFixed(1)});
+    renderThread(); updateDl();
+    const f = $('fq'); if (f && thread.length > 1) f.scrollIntoView({block:'nearest'});
+  }catch(e){
+    if (/HTTP 503/.test(String(e.message))) checkStatus(true);
+    renderThread(failHtml(t('err'), String(e.message || e)) + (aiOK === false ? offlineCard() : ''), q);
+  }finally{
+    clearInterval(timerId); $('timer').textContent = ''; setBusy(false);
+  }
+}
+function setBusy(b){ $('go').disabled = b; const f = $('go-follow'); if (f) f.disabled = b; }
+
+function renderThread(pending, failedQ){
+  let h = '';
+  const n = thread.length;
+  thread.forEach((turn, i) => {
+    if (i === n - 1 && !pending) h += answerCard(turn);
+    else h += '<details class="turn"><summary><b>'+esc(turn.q)+'</b> · '+esc(t(turn.a.status))+'</summary>'+answerCard(turn)+'</details>';
+  });
+  if (pending) h += pending;
+  if (n && !pending){
+    h += '<div class="card followup"><label for="fq">'+esc(t('follow'))+'</label>'
+      + '<textarea id="fq" maxlength="1000" placeholder="'+esc(t('followPh'))+'">'+(failedQ ? esc(failedQ) : '')+'</textarea>'
+      + '<div class="row"><button class="btn" id="go-follow">'+esc(t('followGo'))+'</button>'
+      + '<button class="btn ghost" id="b-copy">'+esc(t('copy'))+'</button>'
+      + '<button class="btn ghost" id="b-print">'+esc(t('print'))+'</button>'
+      + '<button class="btn ghost" id="b-new">'+esc(t('newQ'))+'</button>'
+      + '<span class="hint">'+esc(t('keys'))+'</span></div></div>';
+  }
+  $('result').innerHTML = h;
+  if (n && !pending){
+    $('go-follow').onclick = askFollow;
+    $('fq').addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') askFollow(); });
+    $('b-copy').onclick = () => { navigator.clipboard?.writeText(plainText()); $('b-copy').textContent = t('copied'); };
+    $('b-print').onclick = printSlip;
+    $('b-new').onclick = newQuestion;
+  }
+}
+function answerCard(turn){
+  const a = turn.a, cls = a.status, lang = isHi(a.answer) ? 'hi' : 'en';
+  let h = '<div class="card ans '+cls+'">';
+  if (thread.length > 1) h += '<div class="qline">'+esc(turn.q)+'</div>';
+  h += '<span class="badge '+cls+'">'+STATE_ICON[cls]+' '+esc(t(cls))+'</span><div class="state-x '+cls+'">'+esc(t('x'+cls))+'</div>';
+  if (a.answer) h += '<div class="answer" lang="'+lang+'">'+fmt(a.answer)+'</div>';
+  if (a.needs) h += '<div class="askc"><b>'+esc(t('askc'))+':</b> '+esc(a.needs)+'</div>';
+  if (a.amendNote || a.amendments.length){
+    const am = a.amendments[0];
+    const text = a.amendNote || (am ? (lang === 'hi' ? am.summary_hi : am.summary_en) : '');
+    h += '<div class="amend">⚠ <b>'+esc(t('amend'))+':</b> '+esc(text)
+      + a.amendments.map(x => '<small>'+esc(t('amendSrc'))+': '+esc(x.source)+' · <a href="'+esc(x.source_url)+'" target="_blank" rel="noopener">link</a> · '+esc(t('gazette'))+'</small>').join('')
+      + '</div>';
+  }
+  a.warnings.forEach(w => h += '<div class="warn">⚠ '+esc(w)+'</div>');
+  if (a.cites.length){
+    h += '<h2>'+esc(t('cites'))+' ('+a.cites.length+')</h2>';
+    a.cites.forEach(c => {
+      const link = c.page ? '<a href="'+esc(pdfUrl(c.page))+'" target="_blank" rel="noopener">'+esc(t('open'))+' ('+esc(t('page'))+' '+esc(c.page)+')</a>' : '';
+      h += '<div class="cite"><div class="cite-h"><b>'+esc(t('rule'))+' '+esc(c.rule)+(c.title?' · '+esc(c.title):'')+'</b>'
+        + '<span><span class="v y">✓ '+esc(t('verified'))+'</span> &nbsp; '+link+'</span></div>'
+        + (c.supports ? '<div class="hint" style="padding:6px 14px 0">'+esc(c.supports)+'</div>' : '')
+        + '<blockquote>'+esc(tidyQuote(c.quote))+'</blockquote></div>';
+    });
+  }
+  if (a.rejected.length){
+    h += '<details class="calc-d"><summary>✗ '+a.rejected.length+' '+esc(t('rejQ'))+'</summary>'
+      + a.rejected.map(c => '<div class="cite" style="opacity:.75"><div class="cite-h"><b>'+esc(t('rule'))+' '+esc(c.rule)+'</b><span class="v n">✗ '+esc(t('unverified'))+'</span></div><blockquote>'+esc(c.quote)+'</blockquote></div>').join('')
+      + '</details>';
+  }
+  if (a.calcs.length){
+    h += '<details class="calc-d"><summary>'+esc(t('calcD'))+'</summary>' + a.calcs.map(c => calcBody(c.output)).join('') + '</details>';
+  }
+  const how = a.cached ? t('cached') : (a.calls ? a.calls+' '+t(a.calls === 1 ? 'req1' : 'reqN') : '');
+  h += '<div class="meta"><span>'+esc(a.version || CFG.versionLabel[L])+'</span><span>'+(how ? esc(how)+' · ' : '')+esc(a.model)+(turn.took ? ' · '+esc(turn.took)+' s' : '')+'</span></div></div>';
+  return h;
+}
+function plainText(){
+  return thread.map(x => t('q')+': '+x.q+'\n'+t('a')+': '+plain(x.a.answer)
+    + (x.a.cites.length ? '\n\n' + x.a.cites.map(c => 'Rule '+c.rule+(c.page?' (PDF p.'+c.page+')':'')+': "'+c.quote.replace(/\s+/g,' ')+'"').join('\n') : '')
+  ).join('\n\n----\n\n') + '\n\n' + (thread[0]?.a.version || CFG.versionLabel[L]) + ' · ' + t('disc');
+}
+function printSlip(){
+  if (!thread.length) return;
+  $('slip').innerHTML = '<h1>'+esc(t('slipT'))+'</h1><p><i>'+new Date().toLocaleString('en-IN')+'</i></p>'
+   + thread.map(x => '<p><b>'+esc(t('q'))+':</b> '+esc(x.q)+'</p><div><b>'+esc(t('a'))+':</b> '+fmt(x.a.answer)+'</div>'
+     + x.a.cites.map(c => '<p><b>Rule '+esc(c.rule)+(c.title?', '+esc(c.title):'')+(c.page?' (PDF p.'+esc(c.page)+')':'')+'</b></p><blockquote>'+esc(tidyQuote(c.quote))+'</blockquote>').join('')
+     + (x.a.amendNote ? '<p>⚠ '+esc(x.a.amendNote)+'</p>' : '')).join('<hr>')
+   + '<p><b>'+esc(t('ver'))+':</b> '+esc(thread[0].a.version || CFG.versionLabel[L])+'</p><p><small>'+esc(t('disc'))+'</small></p>';
+  window.print();
+}
+
+/* ---------- Input validation (limits from the rulebook, checked by the server) ---------- */
+const SQM_PER = {sqm: 1, ha: 10000, acre: 4046.8564224};
+const FORMS = {
+  A:   {box: 'sc-a',  kind: 'plot',   btn: 'go-plot'},
+  B:   {box: 'sc-b',  kind: 'plot',   btn: 'go-plot'},
+  fee: {box: 'fee-b', kind: 'fee',    btn: 'go-fee'},
+  dev: {box: 'fee-d', kind: 'devfee', btn: 'go-fee'},
+};
+function readForm(f){
+  const data = {}, bad = {};
+  $(f.box).querySelectorAll('[data-f]').forEach(el => {
+    const k = el.dataset.f;
+    if (el.tagName === 'SELECT') { data[k] = el.value || null; return; }
+    if (el.validity && el.validity.badInput) { bad[k] = true; data[k] = null; return; }   // e.g. "1e" or "--5"
+    data[k] = el.value === '' ? null : Number(el.value);
+  });
+  if (f.kind === 'devfee' && data.land_area_sqm != null) data.land_area_sqm = data.land_area_sqm * SQM_PER[$('du').value];
+  if (f.kind === 'fee') { data.use = $('fu').value; data.high_rise = $('fh').checked; }
+  if (f.kind === 'devfee') { data.zone = $('dz').value; data.population = $('dp').value; }
+  return {data, bad};
+}
+function showErrors(f, res){
+  const box = $(f.box);
+  box.querySelectorAll('[data-f]').forEach(el => {
+    const e = res.errors[el.dataset.f];
+    el.classList.toggle('invalid', !!e);
+    el.setAttribute('aria-invalid', e ? 'true' : 'false');
+    const slot = box.querySelector('[data-err="'+el.dataset.f+'"]');
+    if (slot) slot.textContent = e ? (e[L] || e.en) : '';
+  });
+}
+async function validateForm(name){
+  const f = FORMS[name];
+  const {data, bad} = readForm(f);
+  let res;
+  try { res = await postJSON(CFG.validate + f.kind, data); }
+  catch(e){ res = {valid: true, errors: {}}; }     // server unreachable: the calculator will report the error
+  Object.keys(bad).forEach(k => { res.valid = false; res.errors[k] = {en: T.en.num, hi: T.hi.num}; });
+  f.last = res; f.valid = res.valid;
+  showErrors(f, res);
+  refreshButtons();
+  return res.valid;
+}
+function refreshButtons(){
+  $('go-plot').disabled = FORMS.A.valid === false || (!$('sc-b').hidden && FORMS.B.valid === false);
+  const fm = feeMode === 'development' ? FORMS.dev : FORMS.fee;
+  $('go-fee').disabled = fm.valid === false;
+}
+const debounced = {};
+function watchForm(name){
+  const f = FORMS[name];
+  $(f.box).addEventListener('input', () => { clearTimeout(debounced[name]); debounced[name] = setTimeout(() => validateForm(name), 200); });
+  $(f.box).addEventListener('change', () => validateForm(name));
+  if (name === 'dev') $('du').addEventListener('change', () => validateForm(name));
+}
+
+/* ---------- Setback & FAR (+ compare) ---------- */
+function calcBody(d){
+  if (!d || d.error) return '<div class="warn">'+esc(d?.error || t('err'))+'</div>';
+  let h = (d.warnings || []).map(w => '<div class="warn">⚠ '+esc(w)+'</div>').join('');
+  h += '<table class="calc"><tr><th>'+esc(t('item'))+'</th><th>'+esc(t('value'))+'</th><th>'+esc(t('source'))+'</th></tr>'
+    + (d.items || []).map(i => '<tr><td>'+esc(i.label)+(i.note ? '<span class="note">'+esc(i.note)+'</span>' : '')+'</td>'
+      + '<td class="val">'+esc(i.value)+'</td>'
+      + '<td><b>'+esc(t('rule'))+' '+esc(i.rule)+'</b><br><a href="'+esc(pdfUrl(i.page))+'" target="_blank" rel="noopener">'+esc(t('open'))+' '+esc(i.page)+'</a>'
+      + '<span class="q">'+esc(i.quote)+'</span></td></tr>').join('')
+    + '</table>';
+  if (d.floors) h += '<div class="info">'+esc(t('floorsA'))+': '+esc(d.floors.assumptions)+'</div>';
+  (d.amendments || []).forEach(x => h += '<div class="amend">⚠ <b>'+esc(x.date)+', '+esc(t('rule'))+' '+esc(x.clause)+':</b> '
+    + esc(L === 'hi' ? x.summary_hi : x.summary_en)+'<small>'+esc(t('amendSrc'))+': '+esc(x.source)+' · '+esc(t('gazette'))+'</small></div>');
+  if (d.caveat) h += '<div class="info">'+esc(d.caveat)+'</div>';
+  return h;
+}
+const calcCard = d => '<div class="card ans ok" style="margin-top:14px">' + calcBody(d) + '<div class="meta"><span>'+esc(CFG.versionLabel[L])+'</span></div></div>';
+function toggleCompare(){
+  const open = $('sc-b').hidden;
+  if (open){   // start Scenario B as a copy of A
+    const a = $('sc-a').querySelectorAll('[data-f]'), b = $('sc-b').querySelectorAll('[data-f]');
+    a.forEach((el, i) => b[i].value = el.value);
+  }
+  $('sc-b').hidden = !open;
+  $('go-compare').setAttribute('aria-expanded', open);
+  $('go-compare').textContent = t(open ? 'compareOff' : 'compare');
+  if (open){ validateForm('B'); $('cb-road').focus(); }
+  else refreshButtons();
+}
+async function runPlot(){
+  const cmp = !$('sc-b').hidden;
+  const okA = await validateForm('A'), okB = cmp ? await validateForm('B') : true;
+  if (!okA || !okB){ $('res-plot').innerHTML = '<div class="warn" style="margin-top:14px">'+esc(t('fixErr'))+'</div>'; return; }
+  const A = readForm(FORMS.A).data, B = cmp ? readForm(FORMS.B).data : null;
+  $('go-plot').disabled = true;
+  $('res-plot').innerHTML = '<div class="card" style="margin-top:14px"><div class="skel"></div><div class="skel" style="width:70%"></div></div>';
+  try{
+    const [a, b] = await Promise.all([postJSON(CFG.plot, A), cmp ? postJSON(CFG.plot, B) : null]);
+    calcLast.plot = a; calcInputs.plot = A;
+    calcLast.compare = b; calcInputs.compare = cmp ? B : null;
+    renderPlotResult(); updateDl();
+  }catch(e){ fail($('res-plot'), t('err'), String(e.message || e)); }
+  finally{ refreshButtons(); }
+}
+function renderPlotResult(){
+  const a = calcLast.plot, b = calcLast.compare;
+  if (!a){ $('res-plot').innerHTML = ''; return; }
+  if (!b){ $('res-plot').innerHTML = calcCard(a); return; }
+  $('res-plot').innerHTML = '<div class="card ans ok" style="margin-top:14px"><h2 style="margin-top:0">'+esc(t('cmpTitle'))+'</h2>'
+    + compareTable(a, b)
+    + '<details class="calc-d"><summary>'+esc(t('scA'))+' · '+esc(t('calcD'))+'</summary>'+calcBody(a)+'</details>'
+    + '<details class="calc-d"><summary>'+esc(t('scB'))+' · '+esc(t('calcD'))+'</summary>'+calcBody(b)+'</details>'
+    + '<div class="meta"><span>'+esc(CFG.versionLabel[L])+'</span></div></div>';
+}
+function inputsText(i){
+  const p = [i.plot_area_sqm+' sq m', i.road_width_m+' m road'];
+  if (i.frontage_m) p.push(i.frontage_m+' m frontage');
+  if (i.building_type) p.push(i.building_type.replace('_','-'));
+  if (i.proposed_height_m) p.push(i.proposed_height_m+' m high');
+  return p.join(', ');
+}
+function compareTable(a, b){
+  const inA = inputsText(a.inputs), inB = inputsText(b.inputs);
+  let rows = '<tr class="'+(inA!==inB?'chg':'')+'"><td><b>'+esc(t('inputs'))+'</b></td><td>'+esc(inA)+'</td><td>'+esc(inB)+'</td></tr>', changed = 0;
+  const labels = [...new Set([...a.items.map(i => i.label), ...b.items.map(i => i.label)])];
+  labels.forEach(lb => {
+    const va = a.items.find(i => i.label === lb), vb = b.items.find(i => i.label === lb);
+    const diff = (va?.value ?? '') !== (vb?.value ?? '');
+    if (diff) changed++;
+    const src = va || vb;
+    rows += '<tr class="'+(diff?'chg':'')+'"><td>'+esc(lb)+(diff?' <span class="chg-mark">● '+esc(t('changed'))+'</span>':'')
+      + '<span style="display:block;color:var(--muted);font-size:.78rem">'+esc(t('rule'))+' '+esc(src.rule)+', p.'+esc(src.page)+'</span></td>'
+      + '<td>'+esc(va?.value ?? '—')+'</td><td>'+esc(vb?.value ?? '—')+'</td></tr>';
+  });
+  return '<p class="hint">'+(changed ? changed + esc(t('nChanged')) : esc(t('sameAll')))+'</p>'
+    + '<table class="cmp"><tr><th>'+esc(t('item'))+'</th><th>'+esc(t('scA'))+'</th><th>'+esc(t('scB'))+'</th></tr>'+rows+'</table>';
+}
+
+/* ---------- Fee (building / development) ---------- */
+function setFeeMode(m){
+  feeMode = m;
+  document.querySelectorAll('#fee-mode button').forEach(b => b.setAttribute('aria-checked', b.dataset.m === m));
+  $('fee-b').hidden = m !== 'building';
+  $('fee-d').hidden = m !== 'development';
+  $('h-fee').textContent = t(m === 'development' ? 'hfeeD' : 'hfee');
+  validateForm(m === 'development' ? 'dev' : 'fee');
+  showFeeResult();
+}
+function showFeeResult(){
+  const r = calcLast[feeMode === 'development' ? 'devfee' : 'fee'];
+  $('res-fee').innerHTML = r ? calcCard(r) : '';
+}
+async function runFee(){
+  const name = feeMode === 'development' ? 'dev' : 'fee', key = feeMode === 'development' ? 'devfee' : 'fee';
+  if (!await validateForm(name)){ $('res-fee').innerHTML = '<div class="warn" style="margin-top:14px">'+esc(t('fixErr'))+'</div>'; return; }
+  const data = readForm(FORMS[name]).data;
+  $('go-fee').disabled = true;
+  $('res-fee').innerHTML = '<div class="card" style="margin-top:14px"><div class="skel"></div><div class="skel" style="width:70%"></div></div>';
+  try{ calcLast[key] = await postJSON(CFG[key], data); calcInputs[key] = data; showFeeResult(); updateDl(); }
+  catch(e){ fail($('res-fee'), t('err'), String(e.message || e)); }
+  finally{ refreshButtons(); }
+}
+
+/* ---------- One PDF with everything from this session ---------- */
+function sessionCount(){
+  return [...pastThreads, thread].reduce((n, th) => n + th.length, 0) + ['plot','fee','devfee'].filter(k => calcLast[k]).length;
+}
+function updateDl(){ const n = sessionCount(); $('dl-n').textContent = n ? String(n) : ''; }
+async function downloadReport(){
+  const msg = $('dl-msg');
+  if (!sessionCount()){ msg.textContent = t('dlNone'); return; }
+  const conv = [...pastThreads, thread].filter(th => th.length).map(th => th.map(x => ({question: x.q, answer: {
+    status: x.a.rawStatus, answer: x.a.answer, ask_citizen: x.a.needs, amendment_note: x.a.amendNote,
+    citations: x.a.cites.map(c => ({rule: c.rule, quote: c.quote}))}})));
+  const body = {lang: L, conversations: conv, plot: calcInputs.plot || null, compare: calcInputs.compare || null,
+                fee: calcInputs.fee || null, devfee: calcInputs.devfee || null};
+  $('dl').disabled = true; msg.textContent = t('dlBusy');
+  try{
+    const res = await fetch(BASE + CFG.report, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const name = (res.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/)?.[1] || 'BVS-case-report.pdf';
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    msg.textContent = t('dlDone') + name;
+  }catch(e){ msg.textContent = t('err') + ' (' + (e.message || e) + ')'; }
+  finally{ $('dl').disabled = false; }
+}
+
+/* ---------- Offline reference mode ---------- */
+async function checkStatus(force){
+  try{
+    const s = await (await fetch(BASE + '/api/status' + (force ? '?t=' + Date.now() : ''))).json();
+    aiOK = s.ai_available !== false; aiWhy = s.ai_unavailable_reason || '';
+  }catch(e){ aiOK = false; aiWhy = 'server'; }
+  renderOffline();
+}
+function renderOffline(){
+  const box = $('offline');
+  box.hidden = aiOK !== false;
+  if (aiOK === false) box.innerHTML = '<b>'+esc(t('offT'))+':</b> '+esc(t('offD'))+(aiWhy ? ' <span class="hint">('+esc(aiWhy)+')</span>' : '');
+}
+function offlineCard(){
+  return '<div class="card ans nf" style="margin-top:14px"><span class="badge nf">'+STATE_ICON.nf+' '+esc(t('offT'))+'</span>'
+    + '<p>'+esc(t('offAsk'))+'</p><div class="row"><button class="btn ghost" onclick="showTab(\'plot\')">'+esc(t('goPlotT'))+'</button>'
+    + '<button class="btn ghost" onclick="showTab(\'rules\')">'+esc(t('goRulesT'))+'</button></div></div>';
+}
+
+/* ---------- Rules browser + offline search (kept in memory once loaded) ---------- */
+let ruleListLoaded = false;
+const ruleCache = new Map(), searchCache = new Map();
+async function loadRuleList(){
+  if (ruleListLoaded) return;
+  try{
+    const list = await (await fetch(BASE + '/api/rules')).json();
+    const parts = [];
+    list.forEach(r => { let p = parts.find(x => x.name === r.part); if (!p) parts.push(p = {name: r.part, rules: []}); p.rules.push(r); });
+    $('rule-list').innerHTML = parts.map(p => '<details><summary>'+esc(p.name)+' ('+p.rules.length+')</summary>'
+      + p.rules.map(r => '<button data-r="'+esc(r.rule)+'">'+esc(t('rule'))+' '+esc(r.rule)+' · '+esc(r.title)+' <span class="hint">p.'+esc(r.page_start)+'</span></button>').join('')
+      + '</details>').join('');
+    ruleListLoaded = true;
+  }catch(e){ fail($('rule-list'), t('err'), String(e.message || e)); }
+}
+async function showRule(n){
+  const box = $('rule-view');
+  try{
+    let r = ruleCache.get(n);
+    if (!r){
+      box.innerHTML = '<div class="card" style="margin-top:14px"><div class="skel"></div></div>';
+      const res = await fetch(BASE + CFG.rule + encodeURIComponent(n));
+      if (!res.ok) throw new Error(res.status === 404 ? t('rnf') : 'HTTP ' + res.status);
+      r = await res.json(); ruleCache.set(n, r);
+    }
+    box.innerHTML = '<div class="cite" style="margin-top:14px;background:var(--card)"><div class="cite-h"><b>'+esc(t('rule'))+' '+esc(r.rule)+' · '+esc(r.title)+'</b>'
+      + '<span><a href="'+esc(pdfUrl(r.page_start))+'" target="_blank" rel="noopener">'+esc(t('open'))+' ('+esc(t('page'))+' '+esc(r.page_start)+'–'+esc(r.page_end)+')</a>'
+      + ' &nbsp; <button class="close-d" style="display:inline-block;margin:0" onclick="$(\'rule-view\').innerHTML=\'\'">✕ '+esc(t('close'))+'</button></span></div>'
+      + '<blockquote style="max-height:none">'+esc(r.text)+'</blockquote></div>';
+    box.scrollIntoView({block:'start', behavior:'smooth'});
+  }catch(e){ fail(box, String(e.message || e)); }
+}
+async function runSearch(){
+  const q = $('rs').value.trim(), box = $('res-search');
+  if (!q) return;
+  try{
+    let hits = searchCache.get(q.toLowerCase());
+    if (!hits){ hits = await (await fetch(BASE + '/api/search?q=' + encodeURIComponent(q))).json(); searchCache.set(q.toLowerCase(), hits); }
+    const words = q.toLowerCase().split(/\s+/).filter(w => w.length > 1).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const mark = s => words.length ? esc(s).replace(new RegExp('(' + words.join('|') + ')', 'gi'), '<mark>$1</mark>') : esc(s);
+    box.innerHTML = !hits.length ? '<div class="warn" style="margin-top:12px">'+esc(t('noHits'))+'</div>'
+      : '<p class="hint">'+hits.length+esc(t('hits'))+'</p>' + hits.map(h => '<div class="hit"><button data-r="'+esc(h.rule)+'">'+esc(t('rule'))+' '+esc(h.rule)+' · '+esc(h.title)+'</button>'
+        + ' <a href="'+esc(pdfUrl(h.page))+'" target="_blank" rel="noopener" style="font-size:.82rem;color:var(--accent)">p.'+esc(h.page)+'</a>'
+        + '<span class="hint">'+mark(h.snippet)+'</span></div>').join('');
+  }catch(e){ fail(box, t('err'), String(e.message || e)); }
+}
+
+/* ---------- Every opened panel can be closed: a Close button inside it, and Esc ---------- */
+const openStack = [];
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement)) return;
+  if (d.open){
+    openStack.push(d);
+    if (!d.querySelector(':scope > .close-d')){
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'close-d'; b.textContent = '▴ ' + t('close');
+      b.onclick = () => { d.open = false; d.querySelector('summary')?.focus(); };
+      d.appendChild(b);
+    }
+  } else {
+    const i = openStack.lastIndexOf(d); if (i >= 0) openStack.splice(i, 1);
+  }
+}, true);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const here = document.activeElement?.closest?.('details[open]');   // the panel the clerk is in
+  if (here){ here.open = false; here.querySelector('summary')?.focus(); return; }
+  while (openStack.length){ const d = openStack.pop(); if (d.isConnected && d.open){ d.open = false; d.querySelector('summary')?.focus(); break; } }
+});
+
+/* ---------- Wire up ---------- */
+document.querySelectorAll('.lang button').forEach(b => b.onclick = () => applyLang(b.dataset.l));
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => { showTab(b.dataset.tab); setUrl('?tab='+b.dataset.tab); });
+$('go').onclick = ask;
+$('q').addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') ask(); });
+$('go-plot').onclick = runPlot;
+$('go-compare').onclick = toggleCompare;
+$('go-fee').onclick = runFee;
+document.querySelectorAll('#fee-mode button').forEach(b => b.onclick = () => setFeeMode(b.dataset.m));
+['pa','rw','pf','ph','cb-area','cb-road','cb-front','cb-height'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') runPlot(); }));
+['ba','da'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') runFee(); }));
+Object.keys(FORMS).forEach(watchForm);
+$('dl').onclick = downloadReport;
+$('go-search').onclick = runSearch;
+$('rs').addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });
+$('collapse-all').onclick = () => document.querySelectorAll('#rule-list details[open]').forEach(d => d.open = false);
+document.addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (b) showRule(b.dataset.r); });
+$('chips').innerHTML = EXAMPLES.map((x,i)=>'<button class="chip" data-i="'+i+'" lang="'+(isHi(x)?'hi':'en')+'">'+esc(x.length>70?x.slice(0,68)+'…':x)+'</button>').join('');
+$('chips').onclick = e => { const b=e.target.closest('.chip'); if(b){ $('q').value = EXAMPLES[b.dataset.i]; $('q').focus(); } };
+
+const qs = new URLSearchParams(location.search);
+applyLang(/[ऀ-ॿ]/.test(navigator.language) || navigator.language.startsWith('hi') ? 'hi' : 'en');
+checkStatus();
+validateForm('A'); validateForm('fee');
+if (['plot','fee','rules'].includes(qs.get('tab'))) showTab(qs.get('tab'));
+if (qs.get('fee') === 'development') { showTab('fee'); setFeeMode('development'); }   // /?tab=fee&fee=development
+if (qs.get('q')){ $('q').value = qs.get('q'); ask(); }
+</script>
+</body>
+</html>

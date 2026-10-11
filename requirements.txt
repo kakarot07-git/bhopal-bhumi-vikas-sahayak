@@ -1,0 +1,6 @@
+anthropic>=1.13
+fastapi>=0.143
+uvicorn>=0.54
+pydantic>=2.14
+fpdf2>=2.8      # PDF report
+uharfbuzz>=0.40 # Hindi text shaping in the PDF

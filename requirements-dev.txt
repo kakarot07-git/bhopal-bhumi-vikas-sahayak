@@ -1,0 +1,3 @@
+-r requirements.txt
+pytest
+playwright   # only for tools/ui_smoke.py; uses the installed Microsoft Edge

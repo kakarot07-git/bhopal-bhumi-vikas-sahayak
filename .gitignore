@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.pytest_cache/
+cache/
+# organisers' briefing document (not part of the tool)
+Track 1 - Bhumi Vikas Sahayak - Participant guide.pdf
