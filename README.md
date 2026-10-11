@@ -36,6 +36,19 @@ The clerk types it in English or Hindi. In about 15–25 seconds they get:
 
 **Offline reference mode:** the Setback & FAR tab (with Compare), the Fee tab, the PDF report, the **Rules** tab (browse all 106 rules by part, keyword search, full rule text) and the PDF links all work **without an API key or internet**. The page checks whether the AI is reachable (a free Models API call, no tokens). If it isn't, the page shows an "Offline reference mode" banner, and the Ask box points the clerk to the offline tabs instead of failing.
 
+### Deploy on Vercel
+
+The repo deploys to Vercel as a FastAPI app with no extra configuration (entrypoint `app/server.py`).
+The AI needs one environment variable:
+
+1. Vercel dashboard → your project → **Settings → Environment Variables**
+2. Add `ANTHROPIC_API_KEY` = your Claude API key (for Production, Preview and Development)
+3. **Deployments** → latest deployment → **⋯ → Redeploy** (environment variables only apply to new deployments)
+
+Without the key, the site still works in offline reference mode: Setback & FAR, Fee, Rules and the PDF report. The banner and the Ask box then say that the AI key is not set.
+On Vercel, the answer cache lives in `/tmp` (the only writable folder), so it lasts as long as a server instance does.
+The PDF uses the bundled Hind font (SIL Open Font Licence, `app/fonts/`), so Hindi renders correctly on Linux servers too.
+
 ## How it works: why the answers can be trusted
 
 ```
@@ -124,7 +137,7 @@ UI test: with the server running, `python tools/ui_smoke.py` drives the real pag
 - **Fee slabs:** the table lists whole numbers (0–75, 76–125 …), so an area like 75.5 sq m is read as "above 75 up to 125". The tool says so in the answer. Municipal charges outside Rule 21 are not included.
 - **Input reading is rule-based.** The router understands common English and Hindi phrasings and units. Anything it can't read safely goes to the AI path, which asks rather than guesses. Unusual phrasings may take the slower tool path, but the answer is still verified.
 - **The figure check confirms that each number exists in the evidence, not that it is attached to the right item.** For example, "4 m" passes if a cited rule contains 4.0 somewhere. The key numbers (setbacks, FAR, fees) come from the calculators, so they are exact.
-- **PDF fonts:** Hindi in the PDF needs a Devanagari font. On Windows, the built-in Nirmala UI is used. On other systems, install Noto Sans Devanagari or set `BVS_PDF_FONT`; without one, the PDF is still produced but Hindi text can't be shown.
+- **PDF font:** the PDF uses the bundled Hind font (Latin + Devanagari, SIL Open Font Licence, `app/fonts/OFL.txt`) on every system. `BVS_PDF_FONT` can point to another TTF.
 - **The answer cache stores questions on the server machine** (in `cache/answers.jsonl`, which is excluded from git). Delete the file to clear it, or set `BVS_CACHE=0`.
 - Needs internet and a Claude API key for questions. At current Opus 5.5 prices, a question costs roughly US$0.05–0.10 once the rulebook prompt is cached. The first question each hour pays about US$0.75 to write the cache (1-hour cache). `BVS_EFFORT=low` is faster and cheaper.
 - Not legal advice. The tool points to the rule, and the clerk decides.
@@ -136,6 +149,8 @@ All data comes from the hackathon pack (`data/`, `resources/`):
 - `resources/MP_Bhumi_Vikas_Rules_2012_upto_2025-03-06_EN.pdf`: the official English PDF, served for page links ([source](https://mptownplan.gov.in/NewsPDF/bvn06032025E.pdf))
 - `resources/MP_Bhumi_Vikas_Rules_2012_upto_2025-03-06_HI.pdf`: the official Hindi PDF ([source](https://mptownplan.gov.in/NewsPDF/bvn06032025H.pdf))
 - `resources/sample_questions.md`: the test questions
+
+Bundled font: [Hind](https://github.com/google/fonts/tree/main/ofl/hind) by the Indian Type Foundry (SIL Open Font Licence 1.1), used for the PDF report.
 
 Extra public data: the summary of the **28 Aug 2026 amendment to Rule 2(5)(c)** from [TeamLease RegTech](https://teamleaseregtech.com/updates/article/59469/government-of-madhya-pradesh-amendment-to-land-development-rules) (read 11 Oct 2026). We used no live government systems and no personal data.
 

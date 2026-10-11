@@ -21,7 +21,24 @@ from pathlib import Path
 
 from .rules import ROOT
 
-CACHE_FILE = ROOT / "cache" / "answers.jsonl"
+def _cache_file() -> Path:
+    """cache/answers.jsonl next to the code; on read-only hosts (e.g. Vercel, where only /tmp is
+    writable) the system temp folder is used instead. BVS_CACHE_DIR overrides both."""
+    import tempfile
+    if os.environ.get("BVS_CACHE_DIR"):
+        return Path(os.environ["BVS_CACHE_DIR"]) / "answers.jsonl"
+    local = ROOT / "cache"
+    try:
+        local.mkdir(exist_ok=True)
+        probe = local / ".write-test"
+        probe.write_text("ok")
+        probe.unlink()
+        return local / "answers.jsonl"
+    except OSError:
+        return Path(tempfile.gettempdir()) / "bvs-cache" / "answers.jsonl"
+
+
+CACHE_FILE = _cache_file()
 ENABLED = os.environ.get("BVS_CACHE", "1") != "0"
 TTL = float(os.environ.get("BVS_CACHE_DAYS", "30")) * 86400
 CACHEABLE = {"answered", "partial", "not_found"}
@@ -63,9 +80,12 @@ class AnswerCache:
         k = self.key(question, history)
         with self.lock:
             self.mem[k] = value
-            self.path.parent.mkdir(exist_ok=True)
-            with open(self.path, "a", encoding="utf-8") as f:
-                f.write(json.dumps({"key": k, "at": time.time(), "value": value}, ensure_ascii=False) + "\n")
+            try:  # a cache that cannot be written must never break an answer
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                with open(self.path, "a", encoding="utf-8") as f:
+                    f.write(json.dumps({"key": k, "at": time.time(), "value": value}, ensure_ascii=False) + "\n")
+            except OSError:
+                pass
 
 
 def fingerprint(*parts) -> str:

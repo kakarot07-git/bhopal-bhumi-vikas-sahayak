@@ -126,7 +126,9 @@ def ai_reachable() -> tuple[bool, str]:
         anthropic.Anthropic(max_retries=0, timeout=4.0).models.retrieve(os.environ.get("BVS_MODEL", "claude-opus-5-5"))
         ok, why = True, ""
     except Exception as e:  # no key, no network, API down - all mean "offline" for the clerk
-        ok, why = False, type(e).__name__
+        ok = False
+        why = ("AI key not set (ANTHROPIC_API_KEY)" if isinstance(e, TypeError) and "authentication" in str(e).lower()
+               else type(e).__name__)
     _ai_check.update(at=time.time(), ok=ok, why=why)
     return ok, why
 
@@ -151,7 +153,11 @@ def ask(body: AskIn):
         return assistant().ask(body.question, [t.model_dump() for t in body.history])
     except Exception as e:  # surface a readable message to the clerk; calculators still work
         import anthropic
-        if isinstance(e, anthropic.AuthenticationError):
+        if isinstance(e, TypeError) and "authentication" in str(e).lower():
+            msg = ("The AI key is not set on this server. Add ANTHROPIC_API_KEY to the server's environment "
+                   "variables (on Vercel: Project Settings > Environment Variables) and redeploy. "
+                   "The Setback & FAR, Fee and Rules tabs still work.")
+        elif isinstance(e, anthropic.AuthenticationError):
             msg = "The AI key is missing or invalid. Ask your administrator to set ANTHROPIC_API_KEY. The calculators below still work."
         elif isinstance(e, anthropic.RateLimitError):
             msg = "Too many requests right now. Please wait a few seconds and try again."

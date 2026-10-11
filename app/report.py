@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fpdf import FPDF
@@ -62,20 +62,27 @@ L = {
     },
 }
 
+IST = timezone(timedelta(hours=5, minutes=30))  # Bhopal time, regardless of the server's clock
 INK, MUTED, ACCENT, LINE = (24, 34, 47), (85, 99, 118), (18, 49, 92), (205, 214, 226)
 
 
-def _fonts() -> tuple[tuple, tuple] | None:
+FONT_DIR = Path(__file__).resolve().parent / "fonts"
+
+
+def _fonts() -> dict | None:
+    """Font for English + Hindi. The bundled Hind font (SIL Open Font Licence, app/fonts) has both Latin and
+    Devanagari, so the PDF looks the same on any server, including Vercel/Linux. BVS_PDF_FONT overrides it;
+    Windows' Nirmala UI is the last resort."""
     env_r, env_b = os.environ.get("BVS_PDF_FONT"), os.environ.get("BVS_PDF_FONT_BOLD")
     if env_r and Path(env_r).exists():
-        return (env_r, 0), (env_b if env_b and Path(env_b).exists() else env_r, 0)
+        b = env_b if env_b and Path(env_b).exists() else env_r
+        return {"main": ((env_r, 0), (b, 0)), "fallback": None}
+    hind_r, hind_b = FONT_DIR / "Hind-Regular.ttf", FONT_DIR / "Hind-Bold.ttf"
+    if hind_r.exists() and hind_b.exists():  # one font with both Latin and Devanagari
+        return {"main": ((str(hind_r), 0), (str(hind_b), 0)), "fallback": None}
     win = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts" / "Nirmala.ttc"
     if win.exists():
-        return (str(win), 0), (str(win), 1)  # Nirmala UI, Nirmala UI Bold
-    for r, b in [("/usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf", "/usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf"),
-                 ("/usr/share/fonts/noto/NotoSansDevanagari-Regular.ttf", "/usr/share/fonts/noto/NotoSansDevanagari-Bold.ttf")]:
-        if Path(r).exists():
-            return (r, 0), (b if Path(b).exists() else r, 0)
+        return {"main": ((str(win), 0), (str(win), 1)), "fallback": None}  # Nirmala UI has Latin + Devanagari
     return None
 
 
@@ -92,9 +99,14 @@ class _PDF(FPDF):
         fonts = _fonts()
         self.unicode = fonts is not None
         if fonts:
-            (r, ri), (b, bi) = fonts
+            (r, ri), (b, bi) = fonts["main"]
             self.add_font("Body", "", r, collection_font_number=ri)
             self.add_font("Body", "B", b, collection_font_number=bi)
+            if fonts["fallback"]:  # Devanagari glyphs come from the fallback font
+                (dr, dri), (db, dbi) = fonts["fallback"]
+                self.add_font("Deva", "", dr, collection_font_number=dri)
+                self.add_font("Deva", "B", db, collection_font_number=dbi)
+                self.set_fallback_fonts(["Deva"], exact_match=False)
             self.set_text_shaping(True)
             self.face = "Body"
         else:
@@ -186,7 +198,7 @@ def build_report(data: dict, rules: dict[str, Rule]) -> bytes:
     # ---- header
     pdf.h1(f"Bhumi Vikas Sahayak · भूमि विकास सहायक - {t['title']}" if pdf.unicode else f"Bhumi Vikas Sahayak - {t['title']}")
     pdf.para(t["sub"], size=10, color=MUTED)
-    pdf.para(f"{t['generated']}: {datetime.now().strftime('%d %b %Y, %H:%M')}   ·   {t['version']}: {RULES_VERSION}", size=8.5, color=MUTED)
+    pdf.para(f"{t['generated']}: {datetime.now(IST).strftime('%d %b %Y, %H:%M')} IST   ·   {t['version']}: {RULES_VERSION}", size=8.5, color=MUTED)
     for a in AMENDMENTS:
         pdf.ln(1)
         pdf.box(f"{t['amend']} ({a['date']}, Rule {a['clause']}): {a['summary_hi'] if lang == 'hi' else a['summary_en']} {t['check']}")
@@ -227,7 +239,7 @@ def build_report(data: dict, rules: dict[str, Rule]) -> bytes:
         pdf.table([t["item"], t["value"]], rows, (55, 45))
         if summ and summ.get("warnings"):
             for w in summ["warnings"]:
-                pdf.box("⚠ " + w if pdf.unicode else w)
+                pdf.box(w)
 
     # ---- 2. questions and answers
     n = 2
