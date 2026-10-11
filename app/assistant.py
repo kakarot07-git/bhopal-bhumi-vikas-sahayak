@@ -28,6 +28,14 @@ from .support import evidence_for, unsupported_figures
 MODEL = os.environ.get("BVS_MODEL", "claude-opus-5-5")
 EFFORT = os.environ.get("BVS_EFFORT", "medium")  # low | medium | high
 MAX_TOOL_ROUNDS = 4
+
+
+def make_client(**kw) -> anthropic.Anthropic:
+    """Anthropic client; trims a key pasted with stray spaces or a line break (a common slip in host settings)."""
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if key.strip() and key != key.strip():
+        kw["api_key"] = key.strip()
+    return anthropic.Anthropic(**kw)
 MAX_TOKENS = 6000  # longest answer in the eval used ~2,100-2,500 output tokens (incl. thinking)
 MAX_HISTORY_TURNS = 4  # earlier Q&A pairs kept for follow-up questions
 
@@ -159,7 +167,7 @@ def _run_tool(name: str, args: dict) -> dict:
 class Assistant:
     def __init__(self, rules: dict[str, Rule]):
         self.rules = rules
-        self.client = anthropic.Anthropic()
+        self.client = make_client()
         self.system = [
             {"type": "text", "text": INSTRUCTIONS},
             {

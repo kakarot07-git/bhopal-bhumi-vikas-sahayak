@@ -123,7 +123,8 @@ def ai_reachable() -> tuple[bool, str]:
         return _ai_check["ok"], _ai_check["why"]
     try:
         import anthropic
-        anthropic.Anthropic(max_retries=0, timeout=4.0).models.retrieve(os.environ.get("BVS_MODEL", "claude-opus-5-5"))
+        from .assistant import make_client
+        make_client(max_retries=0, timeout=4.0).models.retrieve(os.environ.get("BVS_MODEL", "claude-opus-5-5"))
         ok, why = True, ""
     except Exception as e:  # no key, no network, API down - all mean "offline" for the clerk
         ok = False
@@ -131,6 +132,22 @@ def ai_reachable() -> tuple[bool, str]:
                else type(e).__name__)
     _ai_check.update(at=time.time(), ok=ok, why=why)
     return ok, why
+
+
+def _deployment_info() -> dict:
+    """Safe diagnostics for setting up the AI key on a host such as Vercel. Never returns the key itself:
+    only whether it is present, whether it looks like a Claude key, and the NAMES of similar variables
+    (catches typos like a trailing space or a hyphen)."""
+    key = os.environ.get("ANTHROPIC_API_KEY", "")
+    similar = sorted(k for k in os.environ if "ANTHROPIC" in k.upper() and k != "ANTHROPIC_API_KEY")
+    return {
+        "api_key_present": bool(key.strip()),
+        "api_key_looks_valid": key.strip().startswith("sk-ant-"),
+        "api_key_has_spaces": key != key.strip(),
+        "similar_variable_names": similar,
+        "host_environment": os.environ.get("VERCEL_ENV", "local"),
+        "commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
+    }
 
 
 @app.get("/api/status")
@@ -143,6 +160,7 @@ def status():
         "model": os.environ.get("BVS_MODEL", "claude-opus-5-5"),
         "ai_available": ok,
         "ai_unavailable_reason": why,
+        "deployment": _deployment_info(),
         "amendments": AMENDMENTS,
     }
 
